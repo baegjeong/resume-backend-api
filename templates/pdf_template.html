@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>履歷匯出</title>
+    <style>
+        
+        @page {
+            size: A4 portrait;
+            margin: 2cm;
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 50pt; width: 512pt; top: 772pt; height: 20pt;
+            }
+        }
+        
+        body {
+            font-family: myfont, Arial, sans-serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            color: #333333;
+        }
+
+        h1 {
+            font-size: 24pt;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 16pt;
+            color: #2980b9;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 3px;
+        }
+
+        h3 {
+            font-size: 14pt;
+            color: #34495e;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        p, li {
+            margin-bottom: 8px;
+            text-align: justify;
+        }
+
+        ul {
+            margin-top: 0;
+            padding-left: 20px;
+        }
+
+        .contact-info {
+            text-align: center;
+            font-size: 11pt;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        
+        /* 處理 Markdown 轉出的程式碼區塊等 */
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 10pt;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        {{ content|safe }}
+    </div>
+    
+    <div id="footer_content" style="text-align: center; font-size: 9pt; color: #95a5a6;">
+        <pdf:pagenumber>
+    </div>
+</body>
+</html>

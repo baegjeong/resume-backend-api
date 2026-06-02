@@ -9,7 +9,8 @@ import resume_generator
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-pdfmetrics.registerFont(TTFont('myfont', r'C:\Windows\Fonts\kaiu.ttf'))
+font_path = os.path.join(os.path.dirname(__file__), 'static', 'fonts', 'kaiu.ttf')
+pdfmetrics.registerFont(TTFont('myfont', font_path))
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart CV Optimizer - AI 履歷客製化管線</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="./css/style.css">
+    <!-- Marked.js for Live Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Smart CV Optimizer</h1>
+                    <span class="sub-logo">AI 履歷客製化</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="theme-toggle" class="icon-btn" title="切換深淺色模式">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <div class="status-indicator">
+                    <span class="indicator-dot online"></span>
+                    <span class="status-text">服務運行中</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Left Pane: Input and Controls -->
+            <section class="pane input-pane">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <div class="tab-selectors">
+                            <button class="input-tab active" data-tab="resume-edit-tab">
+                                <i class="fa-solid fa-file-invoice"></i> 原始履歷編輯
+                            </button>
+                            <button class="input-tab" data-tab="jd-input-tab">
+                                <i class="fa-solid fa-briefcase"></i> 目標職缺 (JD)
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Resume Edit Tab -->
+                        <div id="resume-edit-tab" class="tab-content active">
+                            <div class="textarea-container">
+                                <textarea id="original-resume" placeholder="在此貼上或修改您的原始 Markdown 履歷..."
+                                    spellcheck="false"></textarea>
+                                <div class="char-counter"><span id="resume-count">0</span> 字</div>
+                            </div>
+                        </div>
+
+                        <!-- JD Input Tab -->
+                        <div id="jd-input-tab" class="tab-content">
+                            <div class="textarea-container">
+                                <textarea id="target-jd"
+                                    placeholder="在此貼上目標職缺的 JD (Job Description) 描述，以利 AI 進行關聯改寫與 STAR 原則客製化..."
+                                    spellcheck="false"></textarea>
+                                <div class="char-counter"><span id="jd-count">0</span> 字</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible API Settings -->
+                    <div class="settings-accordion">
+                        <button class="accordion-header" id="toggle-settings-btn">
+                            <span><i class="fa-solid fa-sliders"></i> 進階設定 (Gemini API 配置)</span>
+                            <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                        </button>
+                        <div class="accordion-panel" id="settings-panel">
+                            <div class="settings-grid">
+
+                                <div class="input-group">
+                                    <label for="model-name">模型選擇</label>
+                                    <select id="model-name">
+                                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (快速、輕量)</option>
+                                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (推理力強、精確)</option>
+                                        <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
+                                    </select>
+                                </div>
+                                <div class="checkbox-group">
+                                    <label class="switch">
+                                        <input type="checkbox" id="simulation-mode" checked>
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <span class="checkbox-label">啟用模擬生成 (使用預設 mock 資料測試)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Footer -->
+                    <div class="card-footer">
+                        <button id="optimize-btn" class="primary-btn">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>優化履歷與格式驗證</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Pane: Output and Validation -->
+            <section class="pane output-pane">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <div class="tab-selectors">
+                            <button class="output-tab active" data-tab="preview-tab">
+                                <i class="fa-solid fa-eye"></i> 視覺化預覽
+                            </button>
+                            <button class="output-tab" data-tab="markdown-tab">
+                                <i class="fa-solid fa-code"></i> Markdown 原始碼
+                            </button>
+                            <button class="output-tab" data-tab="validation-tab">
+                                <i class="fa-solid fa-list-check"></i> 格式驗證報告
+                                <span class="badge" id="validation-badge"><i
+                                        class="fa-solid fa-circle-question"></i></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Preview Tab -->
+                        <div id="preview-tab" class="tab-content active">
+                            <div class="preview-scroll-wrapper">
+                                <div id="preview-content" class="markdown-body">
+                                    <div class="empty-state">
+                                        <i class="fa-regular fa-clipboard"></i>
+                                        <p>尚未生成客製化履歷。請在左側輸入資料並點擊「優化履歷與格式驗證」按鈕。</p>
+                                    </div>
+                                </div>
+                                <!-- Skeleton Loader -->
+                                <div id="skeleton-loader" class="skeleton-container hidden">
+                                    <div class="skeleton-header"></div>
+                                    <div class="skeleton-block"></div>
+                                    <div class="skeleton-row"></div>
+                                    <div class="skeleton-row short"></div>
+                                    <div class="skeleton-block"></div>
+                                    <div class="skeleton-row"></div>
+                                    <div class="skeleton-row medium"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Markdown Tab -->
+                        <div id="markdown-tab" class="tab-content">
+                            <div class="markdown-editor-wrapper">
+                                <textarea id="optimized-markdown" readonly
+                                    placeholder="生成後的客製化履歷 Markdown 將在此顯示..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Validation Tab -->
+                        <div id="validation-tab" class="tab-content">
+                            <div class="validation-container">
+                                <div class="validation-summary-card">
+                                    <div class="summary-status-icon" id="summary-status-icon">
+                                        <i class="fa-solid fa-circle-question"></i>
+                                    </div>
+                                    <div class="summary-details">
+                                        <h3 id="summary-title">尚未執行驗證</h3>
+                                        <p id="summary-desc">請點擊優化按鈕以進行自動化 Markdown 格式結構驗證。</p>
+                                    </div>
+                                </div>
+
+                                <h4 class="section-title">驗證項目明細 (REQUIRED_SECTIONS)</h4>
+                                <ul class="validation-list" id="validation-list">
+                                    <li class="validation-item pending">
+                                        <i class="fa-solid fa-circle-question item-icon"></i>
+                                        <span class="item-text"># 個人求職引言</span>
+                                        <span class="item-status">等待測試...</span>
+                                    </li>
+                                    <li class="validation-item pending">
+                                        <i class="fa-solid fa-circle-question item-icon"></i>
+                                        <span class="item-text">## 專業技能庫</span>
+                                        <span class="item-status">等待測試...</span>
+                                    </li>
+                                    <li class="validation-item pending">
+                                        <i class="fa-solid fa-circle-question item-icon"></i>
+                                        <span class="item-text">## 工作與專案經歷</span>
+                                        <span class="item-status">等待測試...</span>
+                                    </li>
+                                </ul>
+
+                                <div class="console-log-wrapper">
+                                    <div class="console-header">
+                                        <span><i class="fa-solid fa-terminal"></i> 執行紀錄 (Log)</span>
+                                        <button class="clear-btn" id="clear-console-btn"><i
+                                                class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+                                    <div class="console-body" id="console-logs">
+                                        <div class="log-line info">等待主程式啟動與呼叫...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Footer -->
+                    <div class="card-footer justify-end" id="output-actions">
+                        <button id="copy-btn" class="secondary-btn" disabled>
+                            <i class="fa-regular fa-copy"></i> 複製 Markdown
+                        </button>
+                        <button id="download-btn" class="secondary-btn" disabled>
+                            <i class="fa-solid fa-file-arrow-down"></i> 下載檔案
+                        </button>
+                        <button id="export-pdf-btn" class="secondary-btn" disabled
+                            style="color: #e74c3c; border-color: #e74c3c;">
+                            <i class="fa-solid fa-file-pdf"></i> 匯出 PDF
+                        </button>
+                        <button id="save-local-btn" class="secondary-btn action-highlight" disabled>
+                            <i class="fa-solid fa-floppy-disk"></i> 儲存到本地
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Custom JavaScript -->
+    <script src="./js/app.js"></script>
+</body>
+
+</html>

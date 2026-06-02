@@ -4,6 +4,7 @@ import io
 import markdown
 from xhtml2pdf import pisa
 from flask import Flask, request, jsonify, render_template, send_from_directory, send_file
+from flask_cors import CORS
 import settings
 import resume_generator
 from reportlab.pdfbase import pdfmetrics
@@ -13,6 +14,7 @@ font_path = os.path.join(os.path.dirname(__file__), 'static', 'fonts', 'kaiu.ttf
 pdfmetrics.registerFont(TTFont('myfont', font_path))
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 BASE_RESUME_FILE = "my_resume.md"
 OUTPUT_RESUME_FILE = "客製化履歷_產出成果.md"
